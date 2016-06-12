@@ -32,13 +32,12 @@ public class PopviewActivity extends AppCompatActivity implements TYMapView.TYMa
 
     static {
         System.loadLibrary("TYMapSDK");
-        System.loadLibrary("TYLocationEngine");
     }
 
     private TYMapView mapView;
 
-    private final String CITY_ID = "0021";
-    private final String BUILD_ID= "00210018";
+    private final String CITY_ID = "0021";     //城市编号
+    private final String BUILD_ID= "00210018";//建筑编号
 
     private String mapRootDir;
 
@@ -55,7 +54,7 @@ public class PopviewActivity extends AppCompatActivity implements TYMapView.TYMa
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_popview);
+        setContentView(R.layout.activity_map);
 
         mapView = (TYMapView) findViewById(R.id.map);
         mapView.addMapListener(this);
@@ -66,14 +65,14 @@ public class PopviewActivity extends AppCompatActivity implements TYMapView.TYMa
     private void init(){
 
         //1.设置地图数据保存在SD卡的位置
-        TYMapEnvironment.initMapEnvironment();
-        mapRootDir = Environment.getExternalStorageDirectory() + "/MapDemo/MapFiles";
-        TYMapEnvironment.setRootDirectoryForMapFiles(mapRootDir);
+//        TYMapEnvironment.initMapEnvironment();
+//        mapRootDir = Environment.getExternalStorageDirectory() + "/MapDemo/MapFiles";
+//        TYMapEnvironment.setRootDirectoryForMapFiles(mapRootDir);
 
         //2.copy测试地图数据到SD卡
-        if(isFirst()){
-            copyMapFiles();
-        }
+//        if(isFirst()){
+//            copyMapFiles();
+//        }
 
         //3.获得城市数据、建筑数据
         //获得城市信息
@@ -99,18 +98,6 @@ public class PopviewActivity extends AppCompatActivity implements TYMapView.TYMa
         popview = mapView.getCallout();
     }
 
-    private boolean isFirst(){
-        SharedPreferences settings = getSharedPreferences("first", 0);
-        return settings.getBoolean("first", true);
-    }
-
-    void copyMapFiles() {
-        String sourcePath = "MapResource";
-        String targetPath = TYMapEnvironment.getRootDirectoryForMapFiles();
-        FileHelper.deleteFile(new File(targetPath));
-        FileHelper.copyFolderFromAsset(this, sourcePath, targetPath);
-    }
-
     @Override
     public void onClickAtPoint(TYMapView tyMapView, Point point) {
         tempPoint = point;
@@ -118,27 +105,34 @@ public class PopviewActivity extends AppCompatActivity implements TYMapView.TYMa
 
     @Override
     public void onPoiSelected(TYMapView tyMapView, List<TYPoi> list) {
-        popview.setStyle(R.xml.callout_style);
+        popview.setStyle(R.xml.callout_style);//设置弹窗样式
         if (popview != null && popview.isShowing()) {
             popview.hide();
         }
         if (list != null && list.size() > 0) {
             TYPoi poi = list.get(0);
 
-            Point position;
+            Point position;//点击的点
             if (poi.getGeometry().getClass() == Polygon.class) {
-                position = GeometryEngine.getLabelPointForPolygon((Polygon) poi.getGeometry(),TYMapEnvironment.defaultSpatialReference());
+                position = GeometryEngine.getLabelPointForPolygon((Polygon)
+                        poi.getGeometry(),TYMapEnvironment.defaultSpatialReference());
             } else {
                 position = (Point) poi.getGeometry();
             }
 
+            //获取标题和相关内容
             String title = poi.getName();
             String detail = poi.getPoiID();
 
-            popview.setMaxWidth(dip2px(PopviewActivity.this, 160));
-            popview.setMaxHeight(dip2px(PopviewActivity.this, 120));
+            //设置弹窗宽/高
+            //arcgis 10.2.8 版本库 弹出框要设置大些   
+            popview.setMaxWidth(dip2px(PopviewActivity.this, 240));
+            popview.setMaxHeight(dip2px(PopviewActivity.this, 170));
 
+            //设置弹窗显示的View
             popview.setContent(poiView(title, detail));
+
+            //显示
             popview.show(position);
         }
     }
@@ -161,8 +155,6 @@ public class PopviewActivity extends AppCompatActivity implements TYMapView.TYMa
         View view = getLayoutInflater().inflate(R.layout.pop_layout, null);
         TextView titleText = (TextView) view.findViewById(R.id.poi_title_txt);
         TextView contentText = (TextView) view.findViewById(R.id.poi_content_txt);
-        Button startBtn = (Button) view.findViewById(R.id.poi_start_btn);
-        Button endBtn = (Button) view.findViewById(R.id.poi_end_btn);
 
         titleText.setText(title);
         contentText.setText(content);

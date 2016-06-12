@@ -1,6 +1,5 @@
 package com.brtbeacon.indoor.ui;
 
-import android.Manifest;
 import android.content.SharedPreferences;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
@@ -27,13 +26,12 @@ public class BaseMapActivity extends AppCompatActivity {
 
     static {
         System.loadLibrary("TYMapSDK");
-        System.loadLibrary("TYLocationEngine");
     }
 
     private TYMapView mapView;
 
-    private final String CITY_ID = "0021";
-    private final String BUILD_ID= "00210018";
+    private final String CITY_ID = "0021";     //城市编号
+    private final String BUILD_ID= "00210018";//建筑编号
 
     private String mapRootDir;
 
@@ -47,7 +45,7 @@ public class BaseMapActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_base_map);
+        setContentView(R.layout.activity_map);
 
         mapView = (TYMapView) findViewById(R.id.map);
 
@@ -57,14 +55,14 @@ public class BaseMapActivity extends AppCompatActivity {
     private void init(){
 
         //1.设置地图数据保存在SD卡的位置
-        TYMapEnvironment.initMapEnvironment();
-        mapRootDir = Environment.getExternalStorageDirectory() + "/MapDemo/MapFiles";
-        TYMapEnvironment.setRootDirectoryForMapFiles(mapRootDir);
+//        TYMapEnvironment.initMapEnvironment();
+//        mapRootDir = Environment.getExternalStorageDirectory() + "/MapDemo/MapFiles";
+//        TYMapEnvironment.setRootDirectoryForMapFiles(mapRootDir);
 
         //2.copy测试地图数据到SD卡
-        if(isFirst()){
-            copyMapFiles();
-        }
+//        if(isFirst()){
+//            copyMapFiles();
+//        }
 
         //3.获得城市数据、建筑数据
         //获得城市信息
@@ -87,17 +85,5 @@ public class BaseMapActivity extends AppCompatActivity {
         mapView.init(currentBuilding, "ty4e13f85911a44a75", "26db2af1g0772n53`dd9`666101ec55a");
 
         mapView.setFloor(currentMapInfo);
-    }
-
-    private boolean isFirst(){
-        SharedPreferences settings = getSharedPreferences("first", 0);
-        return settings.getBoolean("first", true);
-    }
-
-    void copyMapFiles() {
-        String sourcePath = "MapResource";
-        String targetPath = TYMapEnvironment.getRootDirectoryForMapFiles();
-        FileHelper.deleteFile(new File(targetPath));
-        FileHelper.copyFolderFromAsset(this, sourcePath, targetPath);
     }
 }
